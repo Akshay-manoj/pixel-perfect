@@ -7,6 +7,8 @@ import { BoxModelOverlay } from './overlay/BoxModelOverlay';
 import { TooltipOverlay } from './overlay/TooltipOverlay';
 import { DistanceLineOverlay } from './overlay/DistanceLineOverlay';
 import { AlignmentGuideOverlay } from './overlay/AlignmentGuideOverlay';
+import { TokenScanner } from './tokens/TokenScanner';
+import { TokenMapper } from './tokens/TokenMapper';
 import { getSettings } from '@shared/utils/storage.utils';
 import { MESSAGE_ACTIONS } from '@shared/constants/messages.constants';
 import type { UserSettings } from '@shared/types/settings.types';
@@ -16,6 +18,8 @@ let calculator: BoxModelCalculator | null = null;
 let distanceCalculator: DistanceCalculator | null = null;
 let alignmentDetector: AlignmentDetector | null = null;
 let renderer: OverlayRenderer | null = null;
+let tokenScanner: TokenScanner | null = null;
+let tokenMapper: TokenMapper | null = null;
 let currentSettings: UserSettings | null = null;
 
 /** Initialize the inspection system */
@@ -26,6 +30,10 @@ async function init(): Promise<void> {
     calculator = new BoxModelCalculator();
     distanceCalculator = new DistanceCalculator();
     alignmentDetector = new AlignmentDetector();
+    tokenScanner = new TokenScanner();
+    const tokenMap = tokenScanner.scan();
+    tokenScanner.observe();
+    tokenMapper = new TokenMapper(tokenMap);
     renderer = new OverlayRenderer();
     picker = new ElementPicker();
 
@@ -33,9 +41,10 @@ async function init(): Promise<void> {
       try {
         if (!currentSettings || !renderer || !calculator) return;
         const info = calculator.calculate(element);
+        const mappedBoxModel = tokenMapper?.mapBoxModel(info.boxModel);
         renderer.render([
           BoxModelOverlay.build(info, currentSettings.overlayTheme),
-          TooltipOverlay.build(info, currentSettings.overlayTheme),
+          TooltipOverlay.build(info, currentSettings.overlayTheme, mappedBoxModel),
         ]);
       } catch (err) {
         // eslint-disable-next-line no-console
