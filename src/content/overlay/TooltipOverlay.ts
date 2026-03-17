@@ -76,16 +76,11 @@ export class TooltipOverlay {
       `${Math.round(boxModel.content.width)} × ${Math.round(boxModel.content.height)}`
     );
 
-    // Export format buttons row
+    // Separator before buttons
     lines.push('─'.repeat(32));
-    const formatButtons = ['css', 'scss', 'tailwind'] as const;
-    const buttonRow = formatButtons
-      .map((f) => `[${EXPORT_FORMAT_LABELS[f]}]`)
-      .join('  ');
-    lines.push(buttonRow);
 
-    // Calculate tooltip height
-    const tooltipHeight = lines.length * LINE_HEIGHT + TOOLTIP_PADDING * 2;
+    // Calculate tooltip height (add extra row for buttons)
+    const tooltipHeight = (lines.length + 1) * LINE_HEIGHT + TOOLTIP_PADDING * 2;
 
     // Build SVG foreignObject tooltip
     const escapedLines = lines.map((l) => escapeHtml(l));
@@ -99,6 +94,24 @@ export class TooltipOverlay {
       })
       .join('');
 
+    // Build clickable export buttons
+    const formatButtons: Array<{ format: string; label: string }> = [
+      { format: 'css', label: EXPORT_FORMAT_LABELS['css'] },
+      { format: 'scss', label: EXPORT_FORMAT_LABELS['scss'] },
+      { format: 'tailwind', label: EXPORT_FORMAT_LABELS['tailwind'] },
+      { format: 'css-variables', label: 'Vars' },
+    ];
+    const btnStyle = `
+      background:none;border:1px solid ${colors.TOOLTIP_MUTED};color:${colors.TOOLTIP_ACCENT};
+      font-size:11px;font-family:monospace,sans-serif;padding:2px 8px;border-radius:4px;
+      cursor:pointer;margin-right:4px;line-height:16px;
+    `.replace(/\n/g, '');
+    const buttonsHtml = `<div data-pixelperfect="export-buttons" style="display:flex;gap:4px;margin-top:4px;">${
+      formatButtons
+        .map((f) => `<button data-pixelperfect-export="${f.format}" data-pixelperfect-selector="${escapeHtml(info.selector)}" style="${btnStyle}">${f.label}</button>`)
+        .join('')
+    }</div>`;
+
     const svgContent = `
       <foreignObject x="${pos.left}" y="${pos.top}" width="${TOOLTIP_WIDTH}" height="${tooltipHeight}" style="overflow:visible;">
         <div xmlns="http://www.w3.org/1999/xhtml" style="
@@ -108,7 +121,7 @@ export class TooltipOverlay {
           padding:${TOOLTIP_PADDING}px;
           box-shadow:0 4px 16px rgba(0,0,0,0.3);
           pointer-events:auto;
-        ">${textHtml}</div>
+        ">${textHtml}${buttonsHtml}</div>
       </foreignObject>
     `;
 

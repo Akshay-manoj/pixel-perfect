@@ -9,6 +9,16 @@ import { DistanceLineOverlay } from './overlay/DistanceLineOverlay';
 import { AlignmentGuideOverlay } from './overlay/AlignmentGuideOverlay';
 import { TokenScanner } from './tokens/TokenScanner';
 import { TokenMapper } from './tokens/TokenMapper';
+import { CSSEditor } from './editor/CSSEditor';
+import { EditHistory } from './editor/EditHistory';
+import { PersistenceLayer } from './editor/PersistenceLayer';
+import { NudgeController } from './editor/NudgeController';
+import { CSSExporter } from './exporter/CSSExporter';
+import { SCSSExporter } from './exporter/SCSSExporter';
+import { TailwindExporter } from './exporter/TailwindExporter';
+import { CSSVariableExporter } from './exporter/CSSVariableExporter';
+import { ClipboardManager } from './exporter/ClipboardManager';
+import type { IExporter } from '@shared/types/export.types';
 import { getSettings } from '@shared/utils/storage.utils';
 import { MESSAGE_ACTIONS } from '@shared/constants/messages.constants';
 import type { UserSettings } from '@shared/types/settings.types';
@@ -20,6 +30,10 @@ let alignmentDetector: AlignmentDetector | null = null;
 let renderer: OverlayRenderer | null = null;
 let tokenScanner: TokenScanner | null = null;
 let tokenMapper: TokenMapper | null = null;
+let editor: CSSEditor | null = null;
+let editHistory: EditHistory | null = null;
+let persistence: PersistenceLayer | null = null;
+let nudger: NudgeController | null = null;
 let currentSettings: UserSettings | null = null;
 
 /** Initialize the inspection system */
@@ -34,6 +48,11 @@ async function init(): Promise<void> {
     const tokenMap = tokenScanner.scan();
     tokenScanner.observe();
     tokenMapper = new TokenMapper(tokenMap);
+    editHistory = new EditHistory();
+    editor = new CSSEditor();
+    persistence = new PersistenceLayer();
+    nudger = new NudgeController(editHistory);
+    await persistence.loadAndApply();
     renderer = new OverlayRenderer();
     picker = new ElementPicker();
 
@@ -72,6 +91,70 @@ async function init(): Promise<void> {
     picker.onLeave(() => {
       renderer?.clear();
     });
+
+    picker.onClick((element) => {
+      try {
+        if (!calculator || !editor) return;
+        const info = calculator.calculate(element);
+        editor.open(element, info);
+        if (nudger && currentSettings) {
+          nudger.setElement(element, info.selector);
+          nudger.setGridBaseUnit(currentSettings.gridBaseUnit);
+          nudger.enable();
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.debug('[PixelPerfect] Editor open failed:', err);
+      }
+    });
+
+    editor.onEdit((op) => {
+      editHistory?.record(op);
+      persistence?.saveOverride(op.override);
+    });
+
+    // Export button click handler
+    const exporters: Record<string, IExporter> = {
+      css: new CSSExporter(),
+      scss: new SCSSExporter(),
+      tailwind: new TailwindExporter(),
+      'css-variables': new CSSVariableExporter(),
+    };
+    const clipboard = new ClipboardManager();
+
+    document.addEventListener('click', (e) => {
+      const btn = (e.target as Element)?.closest?.('[data-pixelperfect-export]');
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const format = btn.getAttribute('data-pixelperfect-export');
+      const selector = btn.getAttribute('data-pixelperfect-selector');
+      if (!format || !selector || !calculator) return;
+
+      const exporter = exporters[format];
+      if (!exporter) return;
+
+      try {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        const info = calculator.calculate(el);
+        const tokenMap = tokenScanner?.getTokenMap();
+        const result = exporter.export(info, tokenMap, {
+          includeSelector: true,
+          useTokens: true,
+        });
+        clipboard.copy(result.code).then((success) => {
+          if (success) {
+            clipboard.showCopiedFeedback(btn, 'Copied!');
+          }
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.debug('[PixelPerfect] Export failed:', err);
+      }
+    }, true);
 
     if (currentSettings.isEnabled) {
       picker.enable();

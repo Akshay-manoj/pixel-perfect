@@ -45,11 +45,12 @@ describe('TooltipOverlay', () => {
     expect(layer.svgContent).toContain('100');
   });
 
-  it('should display export format buttons', () => {
+  it('should display clickable export format buttons', () => {
     const layer = TooltipOverlay.build(makeElementInfo());
-    expect(layer.svgContent).toContain('[CSS]');
-    expect(layer.svgContent).toContain('[SCSS]');
-    expect(layer.svgContent).toContain('[Tailwind]');
+    expect(layer.svgContent).toContain('data-pixelperfect-export="css"');
+    expect(layer.svgContent).toContain('data-pixelperfect-export="scss"');
+    expect(layer.svgContent).toContain('data-pixelperfect-export="tailwind"');
+    expect(layer.svgContent).toContain('data-pixelperfect-export="css-variables"');
   });
 
   it('should use pointer-events:auto for interactivity', () => {

@@ -138,7 +138,11 @@ export class ElementPicker {
     // mouseover is handled by mousemove for rAF throttling
   }
 
-  private handleMouseOut(_e: MouseEvent): void {
+  private handleMouseOut(e: MouseEvent): void {
+    // Don't fire leave when mouse moves to a PixelPerfect element (tooltip, editor, etc.)
+    const relatedTarget = e.relatedTarget as Element | null;
+    if (relatedTarget && isPixelPerfectElement(relatedTarget)) return;
+
     this.hoveredElement = null;
     for (const cb of this.leaveCallbacks) {
       cb();
