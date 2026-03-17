@@ -78,3 +78,30 @@ export interface TypographyData {
   wcagAA?: boolean;
   wcagAAA?: boolean;
 }
+
+/** CSS Grid container data */
+export interface GridData {
+  templateColumns: string;
+  templateRows: string;
+  templateAreas: string;
+  columnGap: number;
+  rowGap: number;
+  children: GridChildData[];
+}
+
+/** Data for a single grid child */
+export interface GridChildData {
+  element: Element;
+  gridColumn: string;
+  gridRow: string;
+  gridArea: string;
+}
+
+/** Z-index stacking layer entry */
+export interface ZIndexLayer {
+  element: Element;
+  selector: string;
+  zIndex: number;
+  position: string;
+  rect: DOMRect;
+}

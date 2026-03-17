@@ -9,6 +9,13 @@ import { DistanceLineOverlay } from './overlay/DistanceLineOverlay';
 import { AlignmentGuideOverlay } from './overlay/AlignmentGuideOverlay';
 import { TokenScanner } from './tokens/TokenScanner';
 import { TokenMapper } from './tokens/TokenMapper';
+import { FlexboxInspector } from './inspector/FlexboxInspector';
+import { GridInspector } from './inspector/GridInspector';
+import { TypographyInspector } from './inspector/TypographyInspector';
+import { FlexboxOverlay } from './overlay/FlexboxOverlay';
+import { GridOverlay } from './overlay/GridOverlay';
+import { TypographyOverlay } from './overlay/TypographyOverlay';
+import { ContrastOverlay } from './overlay/ContrastOverlay';
 import { CSSEditor } from './editor/CSSEditor';
 import { EditHistory } from './editor/EditHistory';
 import { PersistenceLayer } from './editor/PersistenceLayer';
@@ -34,6 +41,10 @@ let editor: CSSEditor | null = null;
 let editHistory: EditHistory | null = null;
 let persistence: PersistenceLayer | null = null;
 let nudger: NudgeController | null = null;
+let flexboxInspector: FlexboxInspector | null = null;
+let gridInspector: GridInspector | null = null;
+let typographyInspector: TypographyInspector | null = null;
+let contrastOverlay: ContrastOverlay | null = null;
 let currentSettings: UserSettings | null = null;
 
 /** Initialize the inspection system */
@@ -48,6 +59,10 @@ async function init(): Promise<void> {
     const tokenMap = tokenScanner.scan();
     tokenScanner.observe();
     tokenMapper = new TokenMapper(tokenMap);
+    flexboxInspector = new FlexboxInspector();
+    gridInspector = new GridInspector();
+    typographyInspector = new TypographyInspector();
+    contrastOverlay = new ContrastOverlay();
     editHistory = new EditHistory();
     editor = new CSSEditor();
     persistence = new PersistenceLayer();
@@ -61,10 +76,30 @@ async function init(): Promise<void> {
         if (!currentSettings || !renderer || !calculator) return;
         const info = calculator.calculate(element);
         const mappedBoxModel = tokenMapper?.mapBoxModel(info.boxModel);
-        renderer.render([
+        const layers: import('@shared/types/overlay.types').OverlayLayer[] = [
           BoxModelOverlay.build(info, currentSettings.overlayTheme),
           TooltipOverlay.build(info, currentSettings.overlayTheme, mappedBoxModel),
-        ]);
+        ];
+
+        // Flexbox overlay
+        if (flexboxInspector?.isFlexContainer(element)) {
+          const flexData = flexboxInspector.inspect(element);
+          if (flexData) layers.push(FlexboxOverlay.build(flexData, info.rect));
+        }
+
+        // Grid overlay
+        if (gridInspector?.isGridContainer(element)) {
+          const gridData = gridInspector.inspect(element);
+          if (gridData) layers.push(GridOverlay.build(gridData, info.rect));
+        }
+
+        // Typography overlay
+        if (currentSettings.showTypographyInfo && typographyInspector?.hasTextContent(element)) {
+          const typoData = typographyInspector.inspect(element);
+          layers.push(TypographyOverlay.build(typoData, info.rect));
+        }
+
+        renderer.render(layers);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.debug('[PixelPerfect] Overlay render failed:', err);
@@ -158,6 +193,12 @@ async function init(): Promise<void> {
 
     if (currentSettings.isEnabled) {
       picker.enable();
+    }
+
+    // Contrast overlay on page load if enabled
+    if (currentSettings.showContrastRatios && contrastOverlay && renderer) {
+      const contrastLayer = contrastOverlay.build();
+      renderer.render([contrastLayer]);
     }
   } catch (err) {
     // eslint-disable-next-line no-console
