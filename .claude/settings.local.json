@@ -3,7 +3,9 @@
     "allow": [
       "Bash(cd:*)",
       "Bash(cat:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(npx jest:*)",
+      "Bash(npm run:*)"
     ]
   }
 }
