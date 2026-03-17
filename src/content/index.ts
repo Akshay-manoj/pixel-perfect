@@ -20,6 +20,7 @@ import { CSSEditor } from './editor/CSSEditor';
 import { EditHistory } from './editor/EditHistory';
 import { PersistenceLayer } from './editor/PersistenceLayer';
 import { NudgeController } from './editor/NudgeController';
+import { AuditReportBuilder } from './audit/AuditReportBuilder';
 import { CSSExporter } from './exporter/CSSExporter';
 import { SCSSExporter } from './exporter/SCSSExporter';
 import { TailwindExporter } from './exporter/TailwindExporter';
@@ -217,6 +218,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       renderer?.clear();
     }
     sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.action === MESSAGE_ACTIONS.RUN_AUDIT) {
+    if (currentSettings) {
+      const report = new AuditReportBuilder().run(currentSettings);
+      sendResponse(report);
+    } else {
+      sendResponse({ issues: [], summary: { total: 0, errors: 0, warnings: 0, info: 0 }, timestamp: Date.now(), gridUnit: 8 });
+    }
     return true;
   }
 
