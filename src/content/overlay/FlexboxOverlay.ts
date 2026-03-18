@@ -20,12 +20,12 @@ export class FlexboxOverlay {
       const x1 = reverse ? left + width - 10 : left + 10;
       const x2 = reverse ? left + 10 : left + width - 10;
       svg += FlexboxOverlay.arrow(x1, cy, x2, cy, ARROW_COLOR);
-      svg += FlexboxOverlay.label(cx, top - 6, `${data.direction}  justify: ${data.justifyContent}`, ARROW_COLOR);
+      svg += FlexboxOverlay.label(cx, top - 6, `Direction: ${data.direction}  Justify: ${data.justifyContent}`, ARROW_COLOR);
     } else {
       const y1 = reverse ? top + height - 10 : top + 10;
       const y2 = reverse ? top + 10 : top + height - 10;
       svg += FlexboxOverlay.arrow(cx, y1, cx, y2, ARROW_COLOR);
-      svg += FlexboxOverlay.label(left - 6, cy, `${data.direction}  align: ${data.alignItems}`, ARROW_COLOR);
+      svg += FlexboxOverlay.label(left - 6, cy, `Direction: ${data.direction}  Align: ${data.alignItems}`, ARROW_COLOR);
     }
 
     // Cross axis arrow (perpendicular, shorter)
@@ -38,7 +38,7 @@ export class FlexboxOverlay {
     // Child badges
     for (const child of data.children) {
       const r = child.element.getBoundingClientRect();
-      const badgeText = `${child.flexGrow}/${child.flexShrink}/${child.flexBasis}`;
+      const badgeText = `Grow: ${child.flexGrow}  Shrink: ${child.flexShrink}  Basis: ${child.flexBasis}`;
       svg += `
         <rect x="${r.left}" y="${r.bottom + 2}" width="${badgeText.length * 6.5 + 10}" height="16"
           rx="3" fill="${BADGE_BG}" opacity="0.9"/>
@@ -49,7 +49,7 @@ export class FlexboxOverlay {
 
     // Gap badge
     if (data.gap > 0) {
-      svg += FlexboxOverlay.label(left + width - 60, top + height + 14, `gap: ${data.gap}px`, BADGE_BG);
+      svg += FlexboxOverlay.label(left + width - 80, top + height + 14, `Gap: ${data.gap}px`, BADGE_BG);
     }
 
     return {

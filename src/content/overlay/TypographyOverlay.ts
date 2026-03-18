@@ -9,15 +9,19 @@ export class TypographyOverlay {
   static build(data: TypographyData, rect: DOMRect): OverlayLayer {
     const lines: string[] = [];
 
-    // Line 1: font family / size / weight / line-height
+    // Line 1–4: font details with labels
     const family = data.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
-    lines.push(`${family} / ${data.fontSize}px / ${data.fontWeight} / ${data.lineHeight}`);
+    lines.push(`Font:        ${family}`);
+    lines.push(`Size:        ${data.fontSize}px`);
+    lines.push(`Weight:      ${data.fontWeight}`);
+    lines.push(`Line Height: ${data.lineHeight}`);
 
-    // Line 2: color + contrast + WCAG
+    // Line 5–6: color + contrast + WCAG
     const aa = data.wcagAA ? 'AA \u2713' : 'AA \u2717';
     const aaa = data.wcagAAA ? 'AAA \u2713' : 'AAA \u2717';
     const contrast = data.contrastRatio ? `${data.contrastRatio}:1` : '';
-    lines.push(`${data.color}  contrast: ${contrast}  ${aa}  ${aaa}`);
+    lines.push(`Color:       ${data.color}`);
+    lines.push(`Contrast:    ${contrast}  ${aa}  ${aaa}`);
 
     const width = Math.max(...lines.map((l) => l.length * 6.5 + 16), 200);
     const height = lines.length * 16 + 12;

@@ -67,14 +67,14 @@ export class TooltipOverlay {
         twStr = `  ${mapped.top.tailwindClass}`;
       }
 
-      lines.push(`${label.padEnd(8)}  ${valueStr}${remStr}${tokenStr}${twStr}`);
+      const capitalLabel = label.charAt(0).toUpperCase() + label.slice(1);
+      lines.push(`${(capitalLabel + ':').padEnd(9)} ${valueStr}${remStr}${tokenStr}${twStr}`);
     }
 
     // Content dimensions
     lines.push('─'.repeat(32));
-    lines.push(
-      `${Math.round(boxModel.content.width)} × ${Math.round(boxModel.content.height)}`
-    );
+    lines.push(`Width:    ${Math.round(boxModel.content.width)}px`);
+    lines.push(`Height:   ${Math.round(boxModel.content.height)}px`);
 
     // Separator before buttons
     lines.push('─'.repeat(32));

@@ -30,7 +30,7 @@ export class ZIndexOverlay {
         stroke-width="${isHighlighted ? 2 : 1}" rx="2"/>`;
 
       // Z-index badge
-      const badgeText = `z: ${layer.zIndex}`;
+      const badgeText = `Z-Index: ${layer.zIndex}`;
       const bw = badgeText.length * 7 + 10;
       svg += `
         <rect x="${left - offset}" y="${top - offset - 18}" width="${bw}" height="16" rx="3"

@@ -77,7 +77,7 @@ export class DistanceLineOverlay {
   }
 
   private static label(x: number, y: number, value: number, color: string): string {
-    const text = `${Math.round(value)}px`;
+    const text = `Distance: ${Math.round(value)}px`;
     const width = text.length * 7 + 10;
     const height = 18;
     return `

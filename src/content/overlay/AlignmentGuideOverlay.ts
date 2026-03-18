@@ -12,32 +12,32 @@ export class AlignmentGuideOverlay {
 
     if (alignment.alignedTop) {
       const y = (rectA.top + rectB.top) / 2;
-      svg += AlignmentGuideOverlay.horizontalGuide(y, vw, 'top aligned', color);
+      svg += AlignmentGuideOverlay.horizontalGuide(y, vw, 'Align: Top', color);
     }
 
     if (alignment.alignedBottom) {
       const y = (rectA.bottom + rectB.bottom) / 2;
-      svg += AlignmentGuideOverlay.horizontalGuide(y, vw, 'bottom aligned', color);
+      svg += AlignmentGuideOverlay.horizontalGuide(y, vw, 'Align: Bottom', color);
     }
 
     if (alignment.alignedLeft) {
       const x = (rectA.left + rectB.left) / 2;
-      svg += AlignmentGuideOverlay.verticalGuide(x, vh, 'left aligned', color);
+      svg += AlignmentGuideOverlay.verticalGuide(x, vh, 'Align: Left', color);
     }
 
     if (alignment.alignedRight) {
       const x = (rectA.right + rectB.right) / 2;
-      svg += AlignmentGuideOverlay.verticalGuide(x, vh, 'right aligned', color);
+      svg += AlignmentGuideOverlay.verticalGuide(x, vh, 'Align: Right', color);
     }
 
     if (alignment.alignedCenterX) {
       const x = (rectA.left + rectA.width / 2 + rectB.left + rectB.width / 2) / 2;
-      svg += AlignmentGuideOverlay.verticalGuide(x, vh, 'center', color);
+      svg += AlignmentGuideOverlay.verticalGuide(x, vh, 'Align: Center X', color);
     }
 
     if (alignment.alignedCenterY) {
       const y = (rectA.top + rectA.height / 2 + rectB.top + rectB.height / 2) / 2;
-      svg += AlignmentGuideOverlay.horizontalGuide(y, vw, 'center', color);
+      svg += AlignmentGuideOverlay.horizontalGuide(y, vw, 'Align: Center Y', color);
     }
 
     return {

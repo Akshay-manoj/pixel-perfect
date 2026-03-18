@@ -47,7 +47,7 @@ export class GridOverlay {
 
     // Gap badges
     if (data.columnGap > 0 || data.rowGap > 0) {
-      const gapText = `gap: ${data.columnGap}px / ${data.rowGap}px`;
+      const gapText = `Column Gap: ${data.columnGap}px  Row Gap: ${data.rowGap}px`;
       svg += `
         <rect x="${left}" y="${top + height + 4}" width="${gapText.length * 6 + 10}" height="14" rx="2" fill="${LABEL_BG}" opacity="0.85"/>
         <text x="${left + 5}" y="${top + height + 15}" fill="#FFFFFF" font-size="9" font-family="monospace" style="pointer-events:none">${gapText}</text>
